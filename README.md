@@ -39,7 +39,7 @@
 * 这不仅是一个大语言模型全阶段开源复现项目，也是一套面向 LLM 入门与实践的教程。
 * 希望此项目能为更多人提供一个可复现、可理解、可扩展的起点，一起感受创造的乐趣，并推动更广泛 AI 社区的进步。
 
-> 注：本项目基于 Apache 2.0 协议开源，完全免费；“2小时” 基于 NVIDIA 3090 硬件设备（单卡）预估，“3块钱” 指 GPU 服务器租用成本，具体规格详情见下文。
+> 注：本项目基于 Apache 2.0 协议开源，完全免费。“2 小时” 指 SFT 阶段在单张 NVIDIA 3090 上跑完 `1 epoch` 的实测耗时，“3 块钱” 指对应时段的 GPU 租用成本。
 
 ---
 
@@ -167,9 +167,10 @@ minimind2系列旧模型均经过权重映射+（微调训练）QKVO线性层校
 
 </details>
 
-<details> 
-<summary> <b>2025-02-09</b> </summary>
+<details>
+<summary> <b>More...</b> </summary>
 
+**2025-02-09**
 - 迎来发布以来重大更新，Release minimind2 Series。
 - 代码几乎全部重构，使用更简洁明了的统一结构。
   如有旧代码的兼容性需要，可访问[🔗旧仓库内容🔗](https://github.com/jingyaogong/minimind/tree/6e9cd28ef9b34a0a10afbdf6f59e65cb6e628efb)。
@@ -182,11 +183,6 @@ minimind2系列旧模型均经过权重映射+（微调训练）QKVO线性层校
 - minimind2-DeepSeek-R1系列蒸馏模型诞生！
 - minimind2具备一定的英文能力！
 - 更新minimind2与第三方模型的基于更多大模型榜单测试性能的结果。
-
-</details>
-
-<details>
-<summary> <b>More...</b> </summary>
 
 **2024-10-05**
 - 为MiniMind拓展了多模态能力之---视觉
@@ -1207,10 +1203,19 @@ $$
 **训练方式**：
 
 ```bash
+# ① 默认使用torch做rollout
 # 方式1
 torchrun --nproc_per_node N train_agent.py
 # 方式2
 python train_agent.py
+```
+
+```bash
+# ② 使用sglang做rollout
+# 需先启动sglang server：
+python -m sglang.launch_server --model-path ./minimind-3 --attention-backend triton --host 0.0.0.0 --port 8998
+# 训练参数可参考：
+python train_agent.py --rollout_engine sglang --sglang_base_url http://localhost:8998 --sglang_shared_path ./ckpt_mm --data_path ../dataset/agent_rl_math.jsonl --use_wandb
 ```
 
 > 训练后的模型权重文件默认每隔`save_interval步`保存为: `agent_*.pth`
@@ -1963,6 +1968,8 @@ python llmexport.py --path /path/to/模型路径/ --export mnn --hqq --dst_path 
 - SKETCH: Semantic Key-Point Conditioning for Long-Horizon Vessel Trajectory Prediction [[arxiv](https://arxiv.org/pdf/2601.18537)]
 
 - A Built-in Crypto Expert for Artificial Intelligence: How Far is the Horizon? [[IACR ePrint 2026](https://eprint.iacr.org/2026/411.pdf)]
+
+- RetryTrigger: Intelligent Inference Duplication for Enhancing LLM Resilience to Hardware Transient Faults [[FITEE 2026](https://ieeexplore.ieee.org/abstract/document/11479682)]
 
 - 进行中...
 
